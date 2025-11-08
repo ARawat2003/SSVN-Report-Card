@@ -623,14 +623,17 @@ textarea.form-input {
     font-size: 11px;
 }
 
+/* Labels (odd columns) get emphasis but do not force a fixed width so the table can
+   distribute space naturally and avoid collapsing cells on narrow screens */
 .student-info-table td:nth-child(odd) {
     font-weight: 600;
     background: #f8f8f8;
-    width: 15%;
+    white-space: nowrap;
 }
 
+/* Let value cells size automatically to available space; avoid hard-coded widths */
 .student-info-table td:nth-child(even) {
-    width: 35%;
+    white-space: normal;
 }
 
 .scholastic-header {
