@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Report Card Generator</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2><i class="fas fa-graduation-cap"></i> Report Card</h2>
+            <button class="toggle-btn" id="toggleBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="#" class="nav-link active" data-page="home">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a>
+            <a href="#" class="nav-link" data-page="students">
+                <i class="fas fa-user-graduate"></i>
+                <span>Students</span>
+            </a>
+            <a href="#" class="nav-link" data-page="classes">
+                <i class="fas fa-chalkboard"></i>
+                <span>Classes</span>
+            </a>
+            <a href="#" class="nav-link" data-page="marks">
+                <i class="fas fa-clipboard-list"></i>
+                <span>Marks</span>
+            </a>
+            <a href="#" class="nav-link" data-page="reportcards">
+                <i class="fas fa-file-alt"></i>
+                <span>Report Cards</span>
+            </a>
+            <a href="#" class="nav-link" data-page="settings">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-content" id="mainContent">
+        <!-- Home Page -->
+        <div class="page active" id="home">
+            <div class="page-header">
+                <h1>Dashboard</h1>
+                <p>Welcome to School Report Card Generator</p>
+            </div>
+            <div class="dashboard-cards">
+                <div class="card">
+                    <div class="card-icon" style="background: #4CAF50;">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3 id="totalStudents">0</h3>
+                        <p>Total Students</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-icon" style="background: #2196F3;">
+                        <i class="fas fa-chalkboard"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>10</h3>
+                        <p>Classes</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-icon" style="background: #FF9800;">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3 id="totalReports">0</h3>
+                        <p>Reports Generated</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-icon" style="background: #9C27B0;">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3 id="totalSubjects">0</h3>
+                        <p>Total Subjects</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Students Page -->
+        <div class="page" id="students">
+            <div class="page-header">
+                <h1>Students Management</h1>
+                <button class="btn btn-primary" id="addStudentBtn">
+                    <i class="fas fa-plus"></i> Add Student
+                </button>
+            </div>
+            <div class="content-card">
+                <div class="table-container">
+                    <table id="studentsTable">
+                        <thead>
+                            <tr>
+                                <th>Roll No</th>
+                                <th>Name</th>
+                                <th>Father's Name</th>
+                                <th>Class</th>
+                                <th>Date of Birth</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentsTableBody">
+                            <!-- Students will be dynamically added here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Classes Page -->
+        <div class="page" id="classes">
+            <div class="page-header">
+                <h1>Classes & Subjects</h1>
+                <p>Configure subjects and maximum marks for each class</p>
+            </div>
+            <div class="classes-container">
+                <div class="class-selector">
+                    <h3>Select Class</h3>
+                    <div class="class-buttons" id="classButtons">
+                        <!-- Class buttons will be generated here -->
+                    </div>
+                </div>
+                <div class="class-details" id="classDetails">
+                    <h3>Class <span id="selectedClass">1</span> - Subjects Configuration</h3>
+                    <button class="btn btn-primary" id="addSubjectBtn">
+                        <i class="fas fa-plus"></i> Add Subject
+                    </button>
+                    <div class="subjects-container" id="subjectsContainer">
+                        <!-- Subjects will be displayed here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Marks Page -->
+        <div class="page" id="marks">
+            <div class="page-header">
+                <h1>Enter Marks</h1>
+            </div>
+            <div class="content-card">
+                <div class="marks-filters">
+                    <select id="marksClassSelect" class="form-select">
+                        <option value="">Select Class</option>
+                    </select>
+                    <select id="marksStudentSelect" class="form-select">
+                        <option value="">Select Student</option>
+                    </select>
+                    <select id="marksTermSelect" class="form-select">
+                        <option value="">Select Term</option>
+                        <option value="term1">Term 1</option>
+                        <option value="term2">Term 2</option>
+                        <option value="term3">Term 3</option>
+                    </select>
+                </div>
+                <div id="marksEntry" class="marks-entry-container">
+                    <!-- Marks entry form will appear here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Report Cards Page -->
+        <div class="page" id="reportcards">
+            <div class="page-header">
+                <h1>Generate Report Cards</h1>
+            </div>
+            <div class="content-card">
+                <div class="report-filters">
+                    <select id="reportClassSelect" class="form-select">
+                        <option value="">Select Class</option>
+                    </select>
+                    <select id="reportStudentSelect" class="form-select">
+                        <option value="">Select Student</option>
+                    </select>
+                    <button class="btn btn-primary" id="generateReportBtn">
+                        <i class="fas fa-file-pdf"></i> Generate Report Card
+                    </button>
+                </div>
+                <div id="reportPreview" class="report-preview">
+                    <!-- Report will be displayed here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Page -->
+        <div class="page" id="settings">
+            <div class="page-header">
+                <h1>Settings</h1>
+            </div>
+            <div class="content-card">
+                <h3>School Information</h3>
+                <div class="form-group">
+                    <label>School Name</label>
+                    <input type="text" id="schoolName" class="form-input" placeholder="Enter school name">
+                </div>
+                <div class="form-group">
+                    <label>School Address</label>
+                    <input type="text" id="schoolAddress" class="form-input" placeholder="Enter school address">
+                </div>
+                <div class="form-group">
+                    <label>School Email</label>
+                    <input type="email" id="schoolEmail" class="form-input" placeholder="Enter school email">
+                </div>
+                <div class="form-group">
+                    <label>School Phone</label>
+                    <input type="tel" id="schoolPhone" class="form-input" placeholder="Enter school phone">
+                </div>
+                <div class="form-group">
+                    <label>School Reopen Date</label>
+                    <input type="date" id="reopenDate" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label>School Logo</label>
+                    <input type="file" id="schoolLogo" class="form-input" accept="image/*">
+                    <div id="logoPreview" class="image-preview"></div>
+                </div>
+                <div class="form-group">
+                    <label>Principal Signature</label>
+                    <input type="file" id="principalSignature" class="form-input" accept="image/*">
+                    <div id="signaturePreview" class="image-preview"></div>
+                </div>
+                <button class="btn btn-primary" id="saveSettingsBtn">
+                    <i class="fas fa-save"></i> Save Settings
+                </button>
+                <hr>
+                <h3>Data Management</h3>
+                <div class="button-group">
+                    <button class="btn btn-danger" id="clearDataBtn">
+                        <i class="fas fa-trash"></i> Clear All Data
+                    </button>
+                    <button class="btn btn-success" id="exportDataBtn">
+                        <i class="fas fa-download"></i> Export Data
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Student Modal -->
+    <div class="modal" id="studentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add Student</h2>
+                <span class="close" id="closeStudentModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Student Name <span class="required">*</span></label>
+                        <input type="text" id="studentName" class="form-input" placeholder="Enter student name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Date of Birth <span class="required">*</span></label>
+                        <input type="date" id="studentDOB" class="form-input" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Father's Name <span class="required">*</span></label>
+                        <input type="text" id="studentFather" class="form-input" placeholder="Enter father's name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Mother's Name <span class="required">*</span></label>
+                        <input type="text" id="studentMother" class="form-input" placeholder="Enter mother's name" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Address <span class="required">*</span></label>
+                    <textarea id="studentAddress" class="form-input" rows="3" placeholder="Enter complete address" required></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Class <span class="required">*</span></label>
+                        <select id="studentClass" class="form-select" required>
+                            <option value="">Select Class</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Class Roll Number <span class="required">*</span></label>
+                        <input type="text" id="studentRollNo" class="form-input" placeholder="Enter class roll number" required>
+                    </div>
+                </div>
+                
+                <button class="btn btn-primary" id="saveStudentBtn">Save Student</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Subject Modal -->
+    <div class="modal" id="subjectModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add Subject</h2>
+                <span class="close" id="closeSubjectModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Subject Name</label>
+                    <input type="text" id="subjectName" class="form-input" placeholder="Enter subject name">
+                </div>
+                <h4>Maximum Marks Configuration</h4>
+                <div class="marks-config">
+                    <div class="form-group">
+                        <label>UT (Unit Test)</label>
+                        <input type="number" id="maxUT" class="form-input" placeholder="Max marks">
+                    </div>
+                    <div class="form-group">
+                        <label>SEA (Semester Exam)</label>
+                        <input type="number" id="maxSEA" class="form-input" placeholder="Max marks">
+                    </div>
+                    <div class="form-group">
+                        <label>NoteBook</label>
+                        <input type="number" id="maxNoteBook" class="form-input" placeholder="Max marks">
+                    </div>
+                    <div class="form-group">
+                        <label>Term Exam</label>
+                        <input type="number" id="maxTermExam" class="form-input" placeholder="Max marks">
+                    </div>
+                </div>
+                <button class="btn btn-primary" id="saveSubjectBtn">Save Subject</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
