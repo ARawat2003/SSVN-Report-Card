@@ -835,13 +835,29 @@ function generateReport() {
     
     let maxPerTerm = maxUT + maxNB + maxSEA + maxTermExam;
     
-    // Add max marks values row
-    tableRows += `<tr class="max-marks-row"><td class="subject-name"></td>`;
-    tableRows += `<td colspan="4"><strong>${maxUT}</strong></td><td><strong>${maxNB}</strong></td><td><strong>${maxSEA}</strong></td><td><strong>${maxTermExam}</strong></td><td><strong>${maxPerTerm}</strong></td>`;
-    tableRows += `<td colspan="4"><strong>${maxUT}</strong></td><td><strong>${maxNB}</strong></td><td><strong>${maxSEA}</strong></td><td><strong>${maxTermExam}</strong></td><td><strong>${maxPerTerm}</strong></td>`;
-    tableRows += `<tr class="max-marks-row"><td class="subject-name"></td>`;
-    tableRows += `<td colspan="4"><strong>${maxUT}</strong></td><td><strong>${maxNB}</strong></td><td><strong>${maxSEA}</strong></td><td><strong>${maxTermExam}</strong></td><td><strong>${maxPerTerm}</strong></td>`;
-    tableRows += `<td><strong>${maxPerTerm * 3}</strong></td></tr>`;
+    // Add max marks values row (single well-formed TR covering all three terms + grand total)
+    tableRows += `<tr class="max-marks-row">
+        <td class="subject-name"></td>
+        <td colspan="4"><strong>${maxUT}</strong></td>
+        <td><strong>${maxNB}</strong></td>
+        <td><strong>${maxSEA}</strong></td>
+        <td><strong>${maxTermExam}</strong></td>
+        <td><strong>${maxPerTerm}</strong></td>
+
+        <td colspan="4"><strong>${maxUT}</strong></td>
+        <td><strong>${maxNB}</strong></td>
+        <td><strong>${maxSEA}</strong></td>
+        <td><strong>${maxTermExam}</strong></td>
+        <td><strong>${maxPerTerm}</strong></td>
+
+        <td colspan="4"><strong>${maxUT}</strong></td>
+        <td><strong>${maxNB}</strong></td>
+        <td><strong>${maxSEA}</strong></td>
+        <td><strong>${maxTermExam}</strong></td>
+        <td><strong>${maxPerTerm}</strong></td>
+
+        <td><strong>${maxPerTerm * 3}</strong></td>
+    </tr>`;
     
     subjects.forEach(subject => {
         const term1Marks = studentMarks.term1?.[subject.name] || {};
