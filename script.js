@@ -1,3 +1,11 @@
+// Supabase Client
+// TODO: Replace with your Supabase project URL and anon key
+const SUPABASE_URL = 'https://fmnadtrrojcdakgwxqkl.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtbmFkdHJyb2pjZGFrZ3d4cWtsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2MjAwMjgsImV4cCI6MjA3ODE5NjAyOH0.D9ZNEn-LMnywLQXE9_xuEScqKPhvlTZCRIYLb4dy8oc';
+
+const { createClient } = supabase;
+const _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 // Data Storage
 let appData = {
     students: [],
@@ -25,25 +33,160 @@ function initializeClasses() {
     }
 }
 
-// Load data from localStorage
-function loadData() {
-    const savedData = localStorage.getItem('reportCardData');
-    if (savedData) {
-        appData = JSON.parse(savedData);
-    } else {
-        initializeClasses();
+// Load data from Supabase
+async function loadData() {
+    try {
+        // Fetch all data in parallel
+        const { data: students, error: studentsError } = await _supabase.from('students').select('*');
+        if (studentsError) throw studentsError;
+        appData.students = students || [];
+
+        const { data: subjects, error: subjectsError } = await _supabase.from('subjects').select('*');
+        if (subjectsError) throw subjectsError;
+        
+        initializeClasses(); // Reset classes
+        if (subjects) {
+            subjects.forEach(subject => {
+                if (appData.classes[subject.class_id]) {
+                    appData.classes[subject.class_id].subjects.push({
+                        name: subject.name,
+                        maxMarks: {
+                            ut: subject.max_ut,
+                            sea: subject.max_sea,
+                            notebook: subject.max_notebook,
+                            termExam: subject.max_term_exam
+                        }
+                    });
+                }
+            });
+        }
+
+        const { data: marks, error: marksError } = await _supabase.from('marks').select('*');
+        if (marksError) throw marksError;
+        
+        appData.marks = {};
+        if (marks) {
+            marks.forEach(mark => {
+                if (!appData.marks[mark.student_roll_no]) {
+                    appData.marks[mark.student_roll_no] = {};
+                }
+                if (!appData.marks[mark.student_roll_no][mark.term]) {
+                    appData.marks[mark.student_roll_no][mark.term] = {};
+                }
+                appData.marks[mark.student_roll_no][mark.term][mark.subject_name] = {
+                    ut: mark.ut,
+                    sea: mark.sea,
+                    notebook: mark.notebook,
+                    termExam: mark.term_exam
+                };
+            });
+        }
+
+        const { data: settings, error: settingsError } = await _supabase.from('settings').select('*');
+        if (settingsError) throw settingsError;
+
+        if (settings) {
+            settings.forEach(setting => {
+                appData.settings[setting.key] = setting.value;
+            });
+        }
+
+    } catch (error) {
+        console.error('Error loading data from Supabase:', error);
+        alert('Could not load data from the database. Please ensure your Supabase credentials are correct and the database tables are set up. Check the console for more details.');
+        initializeClasses(); // Initialize with empty data on error
     }
+    
+    // Refresh the UI with the loaded data
     updateDashboard();
+    displayStudents();
+    displaySettings();
+    // Display subjects for the initially selected class
+    const selectedClass = document.getElementById('selectedClass').textContent;
+    if (selectedClass) {
+        displaySubjects(selectedClass);
+    }
 }
 
-// Save data to localStorage
-function saveData() {
-    localStorage.setItem('reportCardData', JSON.stringify(appData));
+// Save all data to Supabase
+async function saveData() {
+    try {
+        // 1. Save Students
+        // Use upsert to insert new students or update existing ones based on rollNo
+        const { error: studentError } = await _supabase.from('students').upsert(appData.students, { onConflict: 'rollNo' });
+        if (studentError) throw studentError;
+
+        // 2. Save Subjects
+        // This is a bit more complex. We'll delete all subjects and re-insert them to ensure consistency.
+        const { error: deleteSubjectsError } = await _supabase.from('subjects').delete().neq('name', 'a_dummy_value_to_delete_all'); // Trick to delete all rows
+        if (deleteSubjectsError) throw deleteSubjectsError;
+
+        const subjectsToInsert = [];
+        for (const classNum in appData.classes) {
+            appData.classes[classNum].subjects.forEach(s => {
+                subjectsToInsert.push({
+                    class_id: classNum,
+                    name: s.name,
+                    max_ut: s.maxMarks.ut,
+                    max_sea: s.maxMarks.sea,
+                    max_notebook: s.maxMarks.notebook,
+                    max_term_exam: s.maxMarks.termExam
+                });
+            });
+        }
+        if (subjectsToInsert.length > 0) {
+            const { error: subjectError } = await _supabase.from('subjects').insert(subjectsToInsert);
+            if (subjectError) throw subjectError;
+        }
+
+        // 3. Save Marks
+        // Similar to subjects, we'll clear and re-insert.
+        const { error: deleteMarksError } = await _supabase.from('marks').delete().neq('subject_name', 'a_dummy_value_to_delete_all');
+        if (deleteMarksError) throw deleteMarksError;
+
+        const marksToInsert = [];
+        for (const rollNo in appData.marks) {
+            for (const term in appData.marks[rollNo]) {
+                for (const subject in appData.marks[rollNo][term]) {
+                    const m = appData.marks[rollNo][term][subject];
+                    marksToInsert.push({
+                        student_roll_no: rollNo,
+                        term: term,
+                        subject_name: subject,
+                        ut: m.ut,
+                        sea: m.sea,
+                        notebook: m.notebook,
+                        term_exam: m.termExam
+                    });
+                }
+            }
+        }
+        if (marksToInsert.length > 0) {
+            const { error: marksError } = await _supabase.from('marks').insert(marksToInsert);
+            if (marksError) throw marksError;
+        }
+
+        // 4. Save Settings
+        const settingsToUpsert = [];
+        for (const key in appData.settings) {
+            settingsToUpsert.push({ key: key, value: appData.settings[key] });
+        }
+        if (settingsToUpsert.length > 0) {
+            const { error: settingsError } = await _supabase.from('settings').upsert(settingsToUpsert, { onConflict: 'key' });
+            if (settingsError) throw settingsError;
+        }
+
+        console.log('Data saved to Supabase successfully!');
+
+    } catch (error) {
+        console.error('Error saving data to Supabase:', error);
+        alert('Failed to save data. Please check the console for details.');
+    }
 }
 
 // Initialize app
-document.addEventListener('DOMContentLoaded', function() {
-    loadData();
+document.addEventListener('DOMContentLoaded', async function() {
+    await loadData();
     initializeNavigation();
     initializeSidebar();
     initializeClassButtons();
@@ -205,9 +348,12 @@ function deleteStudent(index) {
         // Delete student's marks as well
         delete appData.marks[student.rollNo];
         appData.students.splice(index, 1);
-        saveData();
-        displayStudents();
-        updateDashboard();
+        
+        (async () => {
+            await saveData();
+            displayStudents();
+            updateDashboard();
+        })();
     }
 }
 
@@ -269,10 +415,12 @@ function initializeModals() {
             appData.students.push(student);
         }
         
-        saveData();
-        displayStudents();
-        updateDashboard();
-        studentModal.classList.remove('active');
+        (async () => {
+            await saveData();
+            displayStudents();
+            updateDashboard();
+            studentModal.classList.remove('active');
+        })();
     });
     
     // Subject Modal
@@ -314,10 +462,12 @@ function initializeModals() {
             appData.classes[classNum].subjects.push(subject);
         }
         
-        saveData();
-        displaySubjects(classNum);
-        updateDashboard();
-        subjectModal.classList.remove('active');
+        (async () => {
+            await saveData();
+            displaySubjects(classNum);
+            updateDashboard();
+            subjectModal.classList.remove('active');
+        })();
     });
     
     // Close modals on outside click
@@ -444,9 +594,12 @@ function deleteSubject(index) {
     if (confirm('Are you sure you want to delete this subject?')) {
         const classNum = document.getElementById('selectedClass').textContent;
         appData.classes[classNum].subjects.splice(index, 1);
-        saveData();
-        displaySubjects(classNum);
-        updateDashboard();
+        
+        (async () => {
+            await saveData();
+            displaySubjects(classNum);
+            updateDashboard();
+        })();
     }
 }
 
@@ -601,9 +754,11 @@ function saveMarks() {
     });
     
     if (isValid) {
-        saveData();
-        alert('Marks saved successfully!');
-        updateDashboard();
+        (async () => {
+            await saveData();
+            alert('Marks saved successfully!');
+            updateDashboard();
+        })();
     }
 }
 
@@ -690,6 +845,7 @@ function generateReport() {
     tableRows += `<tr class="max-marks-row"><td class="subject-name"></td>`;
     tableRows += `<td colspan="4"><strong>${maxUT}</strong></td><td><strong>${maxNB}</strong></td><td><strong>${maxSEA}</strong></td><td><strong>${maxTermExam}</strong></td><td><strong>${maxPerTerm}</strong></td>`;
     tableRows += `<td colspan="4"><strong>${maxUT}</strong></td><td><strong>${maxNB}</strong></td><td><strong>${maxSEA}</strong></td><td><strong>${maxTermExam}</strong></td><td><strong>${maxPerTerm}</strong></td>`;
+    tableRows += `<tr class="max-marks-row"><td class="subject-name"></td>`;
     tableRows += `<td colspan="4"><strong>${maxUT}</strong></td><td><strong>${maxNB}</strong></td><td><strong>${maxSEA}</strong></td><td><strong>${maxTermExam}</strong></td><td><strong>${maxPerTerm}</strong></td>`;
     tableRows += `<td><strong>${maxPerTerm * 3}</strong></td></tr>`;
     
@@ -948,23 +1104,35 @@ function initializeSettingsPage() {
     });
     
     // Save settings
-    document.getElementById('saveSettingsBtn').addEventListener('click', function() {
+    document.getElementById('saveSettingsBtn').addEventListener('click', async function() {
         appData.settings.schoolName = document.getElementById('schoolName').value;
         appData.settings.schoolAddress = document.getElementById('schoolAddress').value;
         appData.settings.schoolEmail = document.getElementById('schoolEmail').value;
         appData.settings.schoolPhone = document.getElementById('schoolPhone').value;
         appData.settings.reopenDate = document.getElementById('reopenDate').value;
         
-        saveData();
+        await saveData();
         alert('Settings saved successfully!');
     });
     
     // Clear all data
     document.getElementById('clearDataBtn').addEventListener('click', function() {
         if (confirm('Are you sure you want to clear all data? This action cannot be undone!')) {
-            if (confirm('This will delete all students, marks, and subjects. Are you absolutely sure?')) {
-                localStorage.removeItem('reportCardData');
-                location.reload();
+            if (confirm('This will delete all students, marks, and subjects from Excel files. Are you absolutely sure?')) {
+                // Clear in-memory data
+                appData.students = [];
+                appData.marks = {};
+                initializeClasses();
+                localStorage.removeItem('reportCardSettings');
+                
+                // Save empty data to all Excel files
+                (async () => {
+                    for (let i = 1; i <= 10; i++) {
+                        await saveClassData(i);
+                    }
+                    alert('All data cleared successfully! Excel files have been reset.');
+                    location.reload();
+                })();
             }
         }
     });
@@ -981,3 +1149,39 @@ function initializeSettingsPage() {
         URL.revokeObjectURL(url);
     });
 }
+
+function displaySettings() {
+    document.getElementById('schoolName').value = appData.settings.schoolName || '';
+    document.getElementById('schoolAddress').value = appData.settings.schoolAddress || '';
+    document.getElementById('schoolEmail').value = appData.settings.schoolEmail || '';
+    document.getElementById('schoolPhone').value = appData.settings.schoolPhone || '';
+    document.getElementById('reopenDate').value = appData.settings.reopenDate || '';
+
+    const logoPreview = document.getElementById('logoPreview');
+    if (appData.settings.schoolLogo) {
+        logoPreview.innerHTML = `<img src="${appData.settings.schoolLogo}" alt="School Logo">`;
+    } else {
+        logoPreview.innerHTML = '';
+    }
+
+    const signaturePreview = document.getElementById('signaturePreview');
+    if (appData.settings.principalSignature) {
+        signaturePreview.innerHTML = `<img src="${appData.settings.principalSignature}" alt="Principal Signature">`;
+    } else {
+        signaturePreview.innerHTML = '';
+    }
+}
+
+// Initialize app
+document.addEventListener('DOMContentLoaded', async function() {
+    await loadData();
+    initializeNavigation();
+    initializeSidebar();
+    initializeClassButtons();
+    initializeModals();
+    initializeStudentsPage();
+    initializeClassesPage();
+    initializeMarksPage();
+    initializeReportCardsPage();
+    initializeSettingsPage();
+});
