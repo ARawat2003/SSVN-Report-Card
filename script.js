@@ -184,19 +184,7 @@ async function saveData() {
     }
 }
 
-// Initialize app
-document.addEventListener('DOMContentLoaded', async function() {
-    await loadData();
-    initializeNavigation();
-    initializeSidebar();
-    initializeClassButtons();
-    initializeModals();
-    initializeStudentsPage();
-    initializeClassesPage();
-    initializeMarksPage();
-    initializeReportCardsPage();
-    initializeSettingsPage();
-});
+// (App already initialized earlier in the file.)
 
 // Sidebar Toggle
 function initializeSidebar() {
@@ -481,7 +469,9 @@ function initializeModals() {
 // Classes Page
 function initializeClassButtons() {
     const classButtons = document.getElementById('classButtons');
-    
+    // clear any existing buttons to avoid duplicates when called multiple times
+    classButtons.innerHTML = '';
+
     for (let i = 1; i <= 10; i++) {
         const btn = document.createElement('button');
         btn.className = 'class-btn';
@@ -610,6 +600,8 @@ function initializeMarksPage() {
     const marksTermSelect = document.getElementById('marksTermSelect');
     
     // Populate class dropdown
+    // make population idempotent (clear before appending) to avoid duplicate options
+    marksClassSelect.innerHTML = '<option value="">Select Class</option>';
     for (let i = 1; i <= 10; i++) {
         const option = document.createElement('option');
         option.value = i;
@@ -769,6 +761,8 @@ function initializeReportCardsPage() {
     const generateReportBtn = document.getElementById('generateReportBtn');
     
     // Populate class dropdown
+    // make population idempotent (clear before appending) to avoid duplicate options
+    reportClassSelect.innerHTML = '<option value="">Select Class</option>';
     for (let i = 1; i <= 10; i++) {
         const option = document.createElement('option');
         option.value = i;
