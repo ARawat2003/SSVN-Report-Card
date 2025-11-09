@@ -1234,3 +1234,58 @@ hr {
         transform: rotate(360deg);
     }
 }
+
+/* Override: make report card tables have a subtle outer border on screen
+   - Use a light-but-visible outer border (not bold black)
+   - Keep thin inner separators using the theme border color
+   - Print rules remain unchanged so printed reports keep stronger borders
+*/
+.report-card .student-info-table,
+.report-card .marks-table table,
+.report-card .co-scholastic,
+.report-card .marks-summary {
+    border: 1px solid rgba(0,0,0,0.18) !important; /* subtle outer line */
+    box-shadow: none !important;                    /* avoid shadow-looking borders */
+}
+
+/* Keep thin inner cell separators using the theme border color */
+.report-card .student-info-table td,
+.report-card .marks-table th,
+.report-card .marks-table td,
+.report-card .co-scholastic td,
+.report-card .marks-summary td {
+    border: 1px solid var(--border-color) !important;
+}
+
+/* Make scholastic header use a subtle border too */
+.report-card .scholastic-header {
+    border: 1px solid rgba(0,0,0,0.12) !important;
+}
+
+/* Ensure report-card tables don't pick up stronger table-level borders elsewhere */
+.report-card table {
+    /* soft outer border for on-screen display */
+    border: 1px solid rgba(0,0,0,0.14) !important;
+    border-collapse: collapse !important;
+}
+
+/* Keep signature line and other non-table strong borders untouched by default. */
+
+/* Specific tweak: remove bold dark divider under the yellow header for
+   Co-Scholastic and Marks boxes (make it subtle on-screen) */
+.report-card .co-scholastic,
+.report-card .marks-summary {
+    border: 1px solid rgba(0,0,0,0.12) !important; /* lighter outer box */
+}
+
+.report-card .co-scholastic-header,
+.report-card .marks-summary-header {
+    border-bottom: 1px solid rgba(0,0,0,0.12) !important; /* subtle divider instead of black */
+    box-shadow: none !important;
+}
+
+/* Apply consistent, soft inner cell separators across report-card tables */
+.report-card table th,
+.report-card table td {
+    border: 1px solid rgba(0,0,0,0.08) !important; /* very light separators */
+}

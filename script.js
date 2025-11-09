@@ -335,9 +335,23 @@ function deleteStudent(index) {
         const student = appData.students[index];
         // Delete student's marks as well
         delete appData.marks[student.rollNo];
+        // Remove from in-memory list
         appData.students.splice(index, 1);
-        
+
         (async () => {
+            try {
+                // Also delete from Supabase directly to ensure DB row is removed
+                const { error: delStudentError } = await _supabase.from('students').delete().eq('rollNo', student.rollNo);
+                if (delStudentError) console.error('Failed to delete student from DB:', delStudentError);
+
+                // Delete student's marks from DB as well
+                const { error: delMarksError } = await _supabase.from('marks').delete().eq('student_roll_no', student.rollNo);
+                if (delMarksError) console.error('Failed to delete student marks from DB:', delMarksError);
+            } catch (err) {
+                console.error('Error deleting student from Supabase:', err);
+            }
+
+            // Persist remaining data (subjects/marks/settings) using existing saveData flow
             await saveData();
             displayStudents();
             updateDashboard();
