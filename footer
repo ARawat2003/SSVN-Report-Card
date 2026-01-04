@@ -1,0 +1,119 @@
+<style>
+  .footer-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    align-items: flex-start;
+    padding: 30px 10px;
+    background-color: #ffffff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    gap: 20px;
+    border-top: 1px solid #eee;
+  }
+
+  .footer-item {
+    flex: 1;
+    min-width: 200px;
+    text-align: center;
+    transition: transform 0.3s ease;
+  }
+
+  .footer-item:hover {
+    transform: translateY(-5px);
+  }
+
+  .youtube-icon {
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+  }
+
+  h4 {
+    margin: 0 0 10px 0;
+    font-size: 18px;
+    color: #333;
+    font-weight: bold;
+  }
+
+  p, a {
+    margin: 0;
+    font-size: 15px;
+    color: #555;
+    text-decoration: none;
+    line-height: 1.6;
+  }
+
+  /* WhatsApp Button Styling */
+  .whatsapp-btn {
+    display: inline-flex;
+    align-items: center;
+    background-color: #25d366;
+    color: white !important;
+    padding: 8px 15px;
+    border-radius: 50px;
+    font-weight: bold;
+    font-size: 14px;
+    margin-top: 10px;
+    box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);
+    transition: all 0.3s ease;
+  }
+
+  .whatsapp-btn:hover {
+    background-color: #128c7e;
+    transform: scale(1.05);
+  }
+
+  .whatsapp-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+  }
+
+  .phone-link {
+    color: #1a73e8;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  /* Animation for the button */
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(37, 211, 102, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
+  }
+  .pulse { animation: pulse 2s infinite; }
+</style>
+
+<div class="footer-container">
+  
+  <div class="footer-item">
+    <h4>Follow Us</h4>
+    <a href="https://www.youtube.com/@ssvnbhatiyana" target="_blank">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/e/ef/Youtube_logo.png" class="youtube-icon" alt="YouTube">
+    </a>
+  </div>
+
+  <div class="footer-item">
+    <h4>Address</h4>
+    <p>Meerpur Mazra, Bhatiyana,<br>Hapur, 245101</p>
+  </div>
+
+  <div class="footer-item">
+    <h4>Email</h4>
+    <a href="mailto:ssvnbhatiyana@gmail.com">ssvnbhatiyana@gmail.com</a>
+  </div>
+
+  <div class="footer-item">
+    <h4>Contact Us</h4>
+    <a href="tel:+916397272455" class="phone-link">📞 +91 6397272455</a>
+    
+    <a href="https://wa.me/916397272455?text=Hello%20SSVN%20Public%20School,%20I%20want%20to%20know%20more%20about%20admissions." 
+       target="_blank" 
+       class="whatsapp-btn pulse">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" class="whatsapp-icon">
+      Chat on WhatsApp
+    </a>
+  </div>
+
+</div>
